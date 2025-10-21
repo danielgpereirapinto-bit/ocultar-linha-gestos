@@ -22,14 +22,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Install Gradle
+      - name: Build Release APK with Gradle
         run: |
-          sudo apt update
-          sudo apt install -y gradle
-
-      - name: Build Release APK
-        run: |
-          gradle assembleRelease --no-daemon
+          cd $GITHUB_WORKSPACE
+          chmod +x ./gradlew
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
           JAVA_OPTS: -Xmx1536m
@@ -39,3 +36,4 @@ jobs:
         with:
           name: ocultar-linha-gestos-apk
           path: app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
