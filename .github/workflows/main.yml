@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -18,18 +19,20 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Download Android SDK tools
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v2
-        with:
-          api-level: 33
-          target: default
-          build-tools: '33.0.2'
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "platforms;android-33" "build-tools;33.0.2"
 
       - name: Make gradlew executable
-        run: chmod +x ./gradlew || true
+        run: chmod +x ./gradlew
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease --no-daemon
+        run: |
+          ./gradlew assembleRelease --no-daemon
         env:
           JAVA_OPTS: -Xmx1536m
 
