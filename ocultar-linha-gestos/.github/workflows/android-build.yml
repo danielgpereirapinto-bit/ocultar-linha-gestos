@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -18,19 +19,17 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Download Android SDK tools
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v2
-        with:
-          api-level: 33
-          target: default
-          build-tools: '33.0.2'
 
       - name: Make gradlew executable
-        run: chmod +x ./gradlew || true
+        run: chmod +x ./gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleRelease --no-daemon
+      - name: Build Release APK
+        run: |
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace
         env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
           JAVA_OPTS: -Xmx1536m
 
       - name: Upload APK
@@ -38,3 +37,4 @@ jobs:
         with:
           name: ocultar-linha-gestos-apk
           path: app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
