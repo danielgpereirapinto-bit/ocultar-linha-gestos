@@ -22,11 +22,6 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Accept Android SDK licenses
-        run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "platforms;android-33" "build-tools;33.0.2"
-
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
@@ -34,6 +29,7 @@ jobs:
         run: |
           ./gradlew assembleRelease --no-daemon
         env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
           JAVA_OPTS: -Xmx1536m
 
       - name: Upload APK
