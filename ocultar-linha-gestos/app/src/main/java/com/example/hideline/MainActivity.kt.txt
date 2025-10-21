@@ -8,6 +8,7 @@ import rikka.shizuku.Shizuku
 import rikka.shizuku.Shizuku.OnRequestPermissionResultListener
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import android.content.pm.PackageManager
 
 class MainActivity : AppCompatActivity(), OnRequestPermissionResultListener {
 
@@ -79,3 +80,4 @@ class MainActivity : AppCompatActivity(), OnRequestPermissionResultListener {
         }
     }
 }
+
