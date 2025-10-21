@@ -1,0 +1,74 @@
+package com.example.hideline
+
+import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import rikka.shizuku.Shizuku
+import rikka.shizuku.Shizuku.OnRequestPermissionResultListener
+import java.io.BufferedReader
+import java.io.InputStreamReader
+
+class MainActivity : AppCompatActivity(), OnRequestPermissionResultListener {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val btnHide = findViewById<Button>(R.id.btn_hide)
+        val btnRestore = findViewById<Button>(R.id.btn_restore)
+
+        btnHide.setOnClickListener {
+            ensureShizukuAndRun { setHideGestureLine(1) }
+        }
+
+        btnRestore.setOnClickListener {
+            ensureShizukuAndRun { setHideGestureLine(0) }
+        }
+    }
+
+    private fun ensureShizukuAndRun(action: () -> Unit) {
+        if (Shizuku.pingBinder()) {
+            action()
+        } else {
+            // request permission (this will show Shizuku permission dialog)
+            Shizuku.addRequestPermissionResultListener(this)
+            Shizuku.requestPermission(0)
+            Toast.makeText(this, "Aguardando permissão do Shizuku...", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onRequestPermissionResult(requestCode: Int, grant: Boolean) {
+        Shizuku.removeRequestPermissionResultListener(this)
+        if (grant) {
+            Toast.makeText(this, "Permissão concedida. Aplicando...", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Permissão negada. Ative o Shizuku.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun setHideGestureLine(value: Int) {
+        // executa command via shizuku (shell)
+        try {
+            // comando: settings put global hide_gesture_line X
+            val cmd = arrayOf("settings", "put", "global", "hide_gesture_line", value.toString())
+            val process = Shizuku.newProcess(cmd, null)
+            val exitCode = process.waitFor()
+            if (exitCode == 0) {
+                Toast.makeText(this, "Comando aplicado com sucesso.", Toast.LENGTH_SHORT).show()
+            } else {
+                // ler output de erro
+                val err = StringBuilder()
+                val br = BufferedReader(InputStreamReader(process.errorStream))
+                var line: String?
+                while (br.readLine().also { line = it } != null) {
+                    err.append(line).append('\n')
+                }
+                Toast.makeText(this, "Falha ao aplicar: $err", Toast.LENGTH_LONG).show()
+            }
+        } catch (t: Throwable) {
+            Toast.makeText(this, "Erro: ${t.message}", Toast.LENGTH_LONG).show()
+            t.printStackTrace()
+        }
+    }
+}
