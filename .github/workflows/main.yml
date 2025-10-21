@@ -22,12 +22,14 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Install Gradle
+        run: |
+          sudo apt update
+          sudo apt install -y gradle
 
       - name: Build Release APK
         run: |
-          ./gradlew assembleRelease --no-daemon
+          gradle assembleRelease --no-daemon
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
           JAVA_OPTS: -Xmx1536m
